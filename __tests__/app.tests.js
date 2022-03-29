@@ -10,10 +10,6 @@ afterAll(() => {
 beforeEach(() => seed(testData));
 
 describe("OTHER TESTS", () => {
-  describe("my server", () => {
-    test("still works", () => {});
-  });
-
   describe("Unknown endpoint", () => {
     test("Returns 404 status code", () => {
       return request(app).get("/not-a-route").expect(404);
@@ -39,10 +35,9 @@ describe("TOPICS TESTS", () => {
 
 describe("ARTICLES TESTS", () => {
   describe("GET /api/articles/:article_id", () => {
-    test("Returns 200 status code and an article object wtih comment_count matching given id", async () => {
-      const article_id = 3;
+    test("Returns 200 status code and an article object with comment_count matching given id", async () => {
       const { body } = await request(app)
-        .get(`/api/articles/${article_id}`)
+        .get(`/api/articles/3`)
         .expect(200);
       expect(body.article).toEqual({
         article_id: 3,
@@ -56,9 +51,8 @@ describe("ARTICLES TESTS", () => {
       });
     });
     test("Returns 200 status code and an article object with comment_count 0 for articles with no comments", async () => {
-      const article_id = 7;
       const { body } = await request(app)
-        .get(`/api/articles/${article_id}`)
+        .get(`/api/articles/7`)
         .expect(200);
       expect(body.article).toEqual({
         article_id: 7,
@@ -72,16 +66,14 @@ describe("ARTICLES TESTS", () => {
       });
     });
     test("Returns 400 status code and a bad request msg for invalid article_id request", async () => {
-      const article_id = "dog";
       const { body } = await request(app)
-        .get(`/api/articles/${article_id}`)
+        .get(`/api/articles/dog`)
         .expect(400);
       expect(body.msg).toEqual("Bad request");
     });
     test("Returns 404 status code and a not found msg for article_id that's not in the database", async () => {
-      const article_id = 99;
       const { body } = await request(app)
-        .get(`/api/articles/${article_id}`)
+        .get(`/api/articles/99`)
         .expect(404);
       expect(body.msg).toEqual("No article with id 99 found in the database");
     });
@@ -89,13 +81,11 @@ describe("ARTICLES TESTS", () => {
 
   describe("PATCH /api/articles/:article_id", () => {
     test("Returns 200 status code and an updated article", async () => {
-      const newVote = 25;
       const articleUpdates = {
-        inc_votes: newVote,
+        inc_votes: 25,
       };
-      const article_id = 3;
       const { body } = await request(app)
-        .patch(`/api/articles/${article_id}`)
+        .patch(`/api/articles/3`)
         .send(articleUpdates)
         .expect(200);
       expect(body.article).toEqual({
@@ -109,62 +99,52 @@ describe("ARTICLES TESTS", () => {
       });
     });
     test("Returns 400 status code if article_id is not valid", async () => {
-      const newVote = 20;
       const articleUpdates = {
-        inc_votes: newVote,
+        inc_votes: 20,
       };
-      const article_id = "notAnId";
       const { body } = await request(app)
-        .patch(`/api/articles/${article_id}`)
+        .patch(`/api/articles/"notAnId"`)
         .send(articleUpdates)
         .expect(400);
       expect(body.msg).toEqual("Bad request");
     });
     test("Returns 404 status code if article_id not in the database", async () => {
-      const newVote = 20;
       const articleUpdates = {
-        inc_votes: newVote,
+        inc_votes: 20,
       };
-      const article_id = 99;
       const { body } = await request(app)
-        .patch(`/api/articles/${article_id}`)
+        .patch(`/api/articles/99`)
         .send(articleUpdates)
         .expect(404);
       expect(body.msg).toEqual("No article with id 99 found in the database");
     });
     test("Returns 400 status code if patch body value not valid", async () => {
-      const newVote = "invalidVote";
       const articleUpdates = {
-        inc_votes: newVote,
+        inc_votes: "invalidVote",
       };
-      const article_id = 3;
       const { body } = await request(app)
-        .patch(`/api/articles/${article_id}`)
+        .patch(`/api/articles/3`)
         .send(articleUpdates)
         .expect(400);
       expect(body.msg).toEqual("Bad request");
     });
     test("Returns 400 status code if patch body key not valid", async () => {
-      const newVote = 22;
       const articleUpdates = {
-        inc_vote: newVote,
+        inc_vote: 22,
       };
-      const article_id = 3;
       const { body } = await request(app)
-        .patch(`/api/articles/${article_id}`)
+        .patch(`/api/articles/3`)
         .send(articleUpdates)
         .expect(400);
       expect(body.msg).toEqual("Invalid request body");
     });
     test("Returns 400 status code if patch body not valid", async () => {
-      const newVote = 22;
       const articleUpdates = {
-        inc_vote: newVote,
+        inc_vote: 22,
         title: "New Title",
       };
-      const article_id = 3;
       const { body } = await request(app)
-        .patch(`/api/articles/${article_id}`)
+        .patch(`/api/articles/3`)
         .send(articleUpdates)
         .expect(400);
       expect(body.msg).toEqual("Invalid request body");
