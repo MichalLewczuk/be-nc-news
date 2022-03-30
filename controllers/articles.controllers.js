@@ -1,7 +1,19 @@
 const {
   selectArticleById,
   updateArticleById,
-} = require("../../be-nc-news/models/articles.models");
+  selectArticles,
+} = require("../models/articles.models");
+
+// GET
+
+exports.getArticles = async (req, res, next) => {
+  try {
+    const articles = await selectArticles();
+    res.status(200).send({ articles });
+  } catch (err) {
+    next(err);
+  }
+};
 
 exports.getArticleById = async (req, res, next) => {
   try {
@@ -13,6 +25,8 @@ exports.getArticleById = async (req, res, next) => {
     next(err);
   }
 };
+
+// PATCH
 
 exports.patchArticleById = async (req, res, next) => {
   try {

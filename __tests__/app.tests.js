@@ -34,11 +34,32 @@ describe("TOPICS TESTS", () => {
 });
 
 describe("ARTICLES TESTS", () => {
+  describe("GET /api/articles", () => {
+    test("Returns 200 status code and array of all articles sorted by date in descending order", async () => {
+      const res = await request(app).get("/api/articles").expect(200);
+      expect(res.body.articles).toBeInstanceOf(Array);
+      expect(res.body.articles.length).toBe(12);
+      expect(res.body.articles).toBeSortedBy("created_at", {
+        descending: true,
+      });
+      res.body.articles.forEach((article) => {
+        expect(article).toMatchObject({
+          article_id: expect.any(Number),
+          title: expect.any(String),
+          topic: expect.any(String),
+          author: expect.any(String),
+          body: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          comment_count: expect.any(String),
+        });
+      });
+    });
+  });
+
   describe("GET /api/articles/:article_id", () => {
     test("Returns 200 status code and an article object with comment_count matching given id", async () => {
-      const { body } = await request(app)
-        .get(`/api/articles/3`)
-        .expect(200);
+      const { body } = await request(app).get(`/api/articles/3`).expect(200);
       expect(body.article).toEqual({
         article_id: 3,
         title: "Eight pug gifs that remind me of mitch",
@@ -50,10 +71,9 @@ describe("ARTICLES TESTS", () => {
         comment_count: "2",
       });
     });
+
     test("Returns 200 status code and an article object with comment_count 0 for articles with no comments", async () => {
-      const { body } = await request(app)
-        .get(`/api/articles/7`)
-        .expect(200);
+      const { body } = await request(app).get(`/api/articles/7`).expect(200);
       expect(body.article).toEqual({
         article_id: 7,
         title: "Z",
@@ -65,16 +85,14 @@ describe("ARTICLES TESTS", () => {
         comment_count: "0",
       });
     });
+
     test("Returns 400 status code and a bad request msg for invalid article_id request", async () => {
-      const { body } = await request(app)
-        .get(`/api/articles/dog`)
-        .expect(400);
+      const { body } = await request(app).get(`/api/articles/dog`).expect(400);
       expect(body.msg).toEqual("Bad request");
     });
+
     test("Returns 404 status code and a not found msg for article_id that's not in the database", async () => {
-      const { body } = await request(app)
-        .get(`/api/articles/99`)
-        .expect(404);
+      const { body } = await request(app).get(`/api/articles/99`).expect(404);
       expect(body.msg).toEqual("No article with id 99 found in the database");
     });
   });
@@ -95,9 +113,10 @@ describe("ARTICLES TESTS", () => {
         author: "icellusedkars",
         body: "some gifs",
         created_at: "2020-11-03T09:12:00.000Z",
-        votes: 0 + newVote,
+        votes: 25,
       });
     });
+
     test("Returns 400 status code if article_id is not valid", async () => {
       const articleUpdates = {
         inc_votes: 20,
@@ -108,6 +127,7 @@ describe("ARTICLES TESTS", () => {
         .expect(400);
       expect(body.msg).toEqual("Bad request");
     });
+
     test("Returns 404 status code if article_id not in the database", async () => {
       const articleUpdates = {
         inc_votes: 20,
@@ -118,6 +138,7 @@ describe("ARTICLES TESTS", () => {
         .expect(404);
       expect(body.msg).toEqual("No article with id 99 found in the database");
     });
+
     test("Returns 400 status code if patch body value not valid", async () => {
       const articleUpdates = {
         inc_votes: "invalidVote",
@@ -128,6 +149,7 @@ describe("ARTICLES TESTS", () => {
         .expect(400);
       expect(body.msg).toEqual("Bad request");
     });
+
     test("Returns 400 status code if patch body key not valid", async () => {
       const articleUpdates = {
         inc_vote: 22,
@@ -138,6 +160,7 @@ describe("ARTICLES TESTS", () => {
         .expect(400);
       expect(body.msg).toEqual("Invalid request body");
     });
+
     test("Returns 400 status code if patch body not valid", async () => {
       const articleUpdates = {
         inc_vote: 22,
