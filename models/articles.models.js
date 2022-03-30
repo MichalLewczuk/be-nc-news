@@ -3,8 +3,9 @@ const db = require("../db/connection");
 //SELECT
 
 exports.selectArticles = async () => {
-  const result = await db.query(`SELECT articles.*, 
-    COUNT(comment_id) AS comment_count
+  const result =
+    await db.query(`SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, 
+    COUNT(comment_id)::INT AS comment_count
     FROM articles
     LEFT JOIN comments
     ON articles.article_id = comments.article_id
@@ -16,7 +17,7 @@ exports.selectArticles = async () => {
 exports.selectArticleById = async (article_id) => {
   const result = await db.query(
     `SELECT articles.*, 
-     COUNT(comment_id) AS comment_count
+     COUNT(comment_id)::INT AS comment_count
      FROM articles
      LEFT JOIN comments
      ON articles.article_id = comments.article_id 
