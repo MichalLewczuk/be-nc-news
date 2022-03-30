@@ -1,4 +1,4 @@
-const { selectTopics } = require("../../be-nc-news/models/topics.models");
+const { selectTopics } = require("../models/topics.models");
 
 exports.getTopics = async (req, res, next) => {
   try {
