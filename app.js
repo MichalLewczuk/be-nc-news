@@ -21,12 +21,16 @@ const {
 
 // Users Require
 
-const { getUsers } = require("./controllers/users.controllers");
+const {
+  getUsers,
+  getUserByUsername,
+} = require("./controllers/users.controllers");
 
 // Comments Require
 
 const {
   getCommentsByArticleId,
+  postComment,
 } = require("./controllers/comments.controllers.js");
 
 // APP
@@ -59,12 +63,17 @@ app.patch("/api/articles/:article_id", patchArticleById);
 // GET
 
 app.get("/api/users", getUsers);
+app.get("/api/users/:username", getUserByUsername);
 
 // ### COMMENTS ###
 
 // GET
 
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
+
+// POST
+
+app.post("/api/articles/:article_id/comments", postComment);
 
 // ### HANDLE ERRORS ###
 
