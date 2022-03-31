@@ -188,3 +188,47 @@ describe("USERS TESTS", () => {
     });
   });
 });
+
+describe("COMMENTS TESTS", () => {
+  describe("GET /api/articles/:article_id/comments", () => {
+    test("Returns 200 status code and array of all comments for given article id", async () => {
+      const res = await request(app)
+        .get("/api/articles/1/comments")
+        .expect(200);
+      expect(res.body.comments).toBeInstanceOf(Array);
+      expect(res.body.comments.length).toBe(11);
+      res.body.comments.forEach((comment) => {
+        expect(comment).toMatchObject({
+          comment_id: expect.any(Number),
+          body: expect.any(String),
+          votes: expect.any(Number),
+          created_at: expect.any(String),
+          author: expect.any(String),
+        });
+      });
+    });
+
+    test("Returns 200 status code and an empty array for article with no comments", async () => {
+      const res = await request(app)
+        .get("/api/articles/8/comments")
+        .expect(200);
+      expect(res.body.comments).toBeInstanceOf(Array);
+      expect(res.body.comments.length).toBe(0);
+      expect(res.body.comments).toEqual([]);
+    });
+
+    test("Returns 404 status code when article id not in the database", async () => {
+      const res = await request(app)
+        .get("/api/articles/99/comments")
+        .expect(404);
+      expect(res.body.msg).toBe(`No article with id 99 found in the database`);
+    });
+
+    test("Returns 400 status code when article id is not valid", async () => {
+      const res = await request(app)
+        .get("/api/articles/notAnId/comments")
+        .expect(400);
+      expect(res.body.msg).toBe(`Bad request`);
+    });
+  });
+});

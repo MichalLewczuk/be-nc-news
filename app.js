@@ -23,6 +23,12 @@ const {
 
 const { getUsers } = require("./controllers/users.controllers");
 
+// Comments Require
+
+const {
+  getCommentsByArticleId,
+} = require("./controllers/comments.controllers.js");
+
 // APP
 
 const app = express();
@@ -53,6 +59,12 @@ app.patch("/api/articles/:article_id", patchArticleById);
 // GET
 
 app.get("/api/users", getUsers);
+
+// ### COMMENTS ###
+
+// GET
+
+app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 
 // ### HANDLE ERRORS ###
 
