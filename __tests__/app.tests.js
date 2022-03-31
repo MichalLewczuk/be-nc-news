@@ -187,6 +187,29 @@ describe("USERS TESTS", () => {
       });
     });
   });
+
+  describe("GET /api/users/:username", () => {
+    test("Returns 200 status code and a user object matching given username", async () => {
+      const { body } = await request(app)
+        .get(`/api/users/icellusedkars`)
+        .expect(200);
+      expect(body.user).toEqual({
+        username: "icellusedkars",
+        name: "sam",
+        avatar_url:
+          "https://avatars2.githubusercontent.com/u/24604688?s=460&v=4",
+      });
+    });
+
+    test("Returns 404 status code and a not found msg for username that's not in the database", async () => {
+      const { body } = await request(app)
+        .get(`/api/users/notInDatabase`)
+        .expect(404);
+      expect(body.msg).toEqual(
+        `Username notInDatabase not found in the database`
+      );
+    });
+  });
 });
 
 describe("COMMENTS TESTS", () => {
@@ -229,6 +252,90 @@ describe("COMMENTS TESTS", () => {
         .get("/api/articles/notAnId/comments")
         .expect(400);
       expect(res.body.msg).toBe(`Bad request`);
+    });
+  });
+
+  describe("POST /api/articles/:article_id/comments", () => {
+    test("Returns 201 status code and the posted comment", async () => {
+      const newComment = {
+        username: "icellusedkars",
+        body: "this is a test comment",
+      };
+      const { body } = await request(app)
+        .post(`/api/articles/9/comments`)
+        .send(newComment)
+        .expect(201);
+      expect(body.comment).toMatchObject({
+        comment_id: 19,
+        article_id: 9,
+        author: "icellusedkars",
+        body: "this is a test comment",
+        created_at: expect.any(String),
+        votes: 0,
+      });
+    });
+
+    test("Returns 400 status code if article_id is not valid", async () => {
+      const newComment = {
+        username: "icellusedkars",
+        body: "this is a test comment",
+      };
+      const { body } = await request(app)
+        .post(`/api/articles/"notAnId"/comments`)
+        .send(newComment)
+        .expect(400);
+      expect(body.msg).toEqual("Bad request");
+    });
+
+    test("Returns 404 status code if article_id not in the database", async () => {
+      const newComment = {
+        username: "icellusedkars",
+        body: "this is a test comment",
+      };
+      const { body } = await request(app)
+        .post(`/api/articles/999/comments`)
+        .send(newComment)
+        .expect(404);
+      expect(body.msg).toEqual("No article with id 999 found in the database");
+    });
+
+    test("Returns 400 status code if post body key not valid", async () => {
+      const newComment = {
+        name: "icellusedkars",
+        body: "this is a test comment",
+      };
+      const { body } = await request(app)
+        .post(`/api/articles/3/comments`)
+        .send(newComment)
+        .expect(400);
+      expect(body.msg).toEqual("Invalid request body");
+    });
+
+    test("Returns 400 status code if post body not valid", async () => {
+      const newComment = {
+        username: "icellusedkars",
+        body: "this is a test comment",
+        votes: 12,
+      };
+      const { body } = await request(app)
+        .post(`/api/articles/3/comments`)
+        .send(newComment)
+        .expect(400);
+      expect(body.msg).toEqual("Invalid request body");
+    });
+
+    test("Returns 404 status code if user not in the database", async () => {
+      const newComment = {
+        username: "usernameNotInDatabase",
+        body: "this is a test comment",
+      };
+      const { body } = await request(app)
+        .post(`/api/articles/3/comments`)
+        .send(newComment)
+        .expect(404);
+      expect(body.msg).toEqual(
+        `Username usernameNotInDatabase not found in the database`
+      );
     });
   });
 });
