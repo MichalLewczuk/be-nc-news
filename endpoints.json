@@ -29,6 +29,7 @@
     "queries": [],
     "exampleResponse": {
       "article": {
+        "article_id": 2,
         "title": "Living in the shadow of a great man",
         "topic": "mitch",
         "author": "butter_bridge",
@@ -43,15 +44,14 @@
     "description": "updates votes for the given article and serves the updated article object",
     "queries": [],
     "exampleOfTheBodySent": {
-      "inc_votes": 5,
-      "edit_body": "Something I wrote "
+      "inc_votes": 5
     },
     "exampleResponse": {
       "articles": {
         "title": "Seafood substitutions are increasing",
         "topic": "cooking",
         "author": "icellusedkars",
-        "body": "Something I wrote",
+        "body": "Random text",
         "votes": 5,
         "article_id": 2,
         "created_at": 1527695953341

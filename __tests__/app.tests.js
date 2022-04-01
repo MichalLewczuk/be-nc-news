@@ -5,9 +5,7 @@ const request = require("supertest");
 const app = require("../app");
 const endpoints = require("../endpoints.json");
 
-afterAll(() => {
-  db.end();
-});
+afterAll(() => db.end());
 beforeEach(() => seed(testData));
 
 describe("OTHER TESTS", () => {
