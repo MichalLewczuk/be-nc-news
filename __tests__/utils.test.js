@@ -8,7 +8,7 @@ const {
 const db = require("../db/connection");
 
 afterAll(() => {
-  db.end();
+  return db.end();
 });
 
 describe("convertTimestampToDate", () => {

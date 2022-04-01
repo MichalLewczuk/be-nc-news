@@ -3,6 +3,7 @@ const seed = require("../db/seeds/seed");
 const testData = require("../db/data/test-data");
 const request = require("supertest");
 const app = require("../app");
+const endpoints = require("../endpoints.json");
 
 afterAll(() => {
   db.end();
@@ -13,6 +14,17 @@ describe("OTHER TESTS", () => {
   describe("Unknown endpoint", () => {
     test("Returns 404 status code", () => {
       return request(app).get("/not-a-route").expect(404);
+    });
+  });
+
+  describe("GET /api", () => {
+    test("Returns status 200 and JSON with all api endpoints", () => {
+      return request(app)
+        .get("/api")
+        .expect(200)
+        .then((res) => {
+          expect(res.body).toEqual(endpoints);
+        });
     });
   });
 });
