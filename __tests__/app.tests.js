@@ -54,6 +54,106 @@ describe("ARTICLES TESTS", () => {
         });
       });
     });
+    test("Returns 200 status code and array of all articles sorted by date in given order", async () => {
+      const res = await request(app).get("/api/articles?order=asc").expect(200);
+      expect(res.body.articles).toBeInstanceOf(Array);
+      expect(res.body.articles.length).toBe(12);
+      expect(res.body.articles).toBeSortedBy("created_at");
+      res.body.articles.forEach((article) => {
+        expect(article).toMatchObject({
+          article_id: expect.any(Number),
+          title: expect.any(String),
+          topic: expect.any(String),
+          author: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          comment_count: expect.any(Number),
+        });
+      });
+    });
+    test("Returns 200 status code and array of all articles sorted by given column in given order", async () => {
+      const res = await request(app)
+        .get("/api/articles?sort_by=comment_count&order=asc")
+        .expect(200);
+      expect(res.body.articles).toBeInstanceOf(Array);
+      expect(res.body.articles.length).toBe(12);
+      expect(res.body.articles).toBeSortedBy("comment_count");
+      res.body.articles.forEach((article) => {
+        expect(article).toMatchObject({
+          article_id: expect.any(Number),
+          title: expect.any(String),
+          topic: expect.any(String),
+          author: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          comment_count: expect.any(Number),
+        });
+      });
+    });
+    test("Returns 200 status code and array of all articles sorted by given column in given order and filtered by given topic", async () => {
+      const res = await request(app)
+        .get("/api/articles?sort_by=comment_count&order=asc&topic=mitch")
+        .expect(200);
+      expect(res.body.articles).toBeInstanceOf(Array);
+      expect(res.body.articles.length).toBe(11);
+      expect(res.body.articles).toBeSortedBy("comment_count");
+      res.body.articles.forEach((article) => {
+        expect(article).toMatchObject({
+          article_id: expect.any(Number),
+          title: expect.any(String),
+          topic: expect.any(String),
+          author: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          comment_count: expect.any(Number),
+        });
+      });
+    });
+    test("Returns 200 status code and array of all articles in given order and filtered by given topic", async () => {
+      const res = await request(app)
+        .get("/api/articles?topic=mitch&order=DESC")
+        .expect(200);
+      expect(res.body.articles).toBeInstanceOf(Array);
+      expect(res.body.articles.length).toBe(11);
+      expect(res.body.articles).toBeSortedBy("created_at", {
+        descending: true,
+      });
+      res.body.articles.forEach((article) => {
+        expect(article).toMatchObject({
+          article_id: expect.any(Number),
+          title: expect.any(String),
+          topic: expect.any(String),
+          author: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          comment_count: expect.any(Number),
+        });
+      });
+    });
+    test("Returns 200 status code and en empty array if no articles with given topic", async () => {
+      const res = await request(app)
+        .get("/api/articles?topic=paper")
+        .expect(200);
+      expect(res.body.articles).toEqual([]);
+    });
+    test("Returns 404 status code if given topic not in the database", async () => {
+      const res = await request(app)
+        .get("/api/articles?topic=northcoders")
+        .expect(404);
+      expect(res.body.msg).toBe(`slug northcoders not found in the database`);
+    });
+    test("Returns 400 status code if given invalid sort_by", async () => {
+      const res = await request(app)
+        .get("/api/articles?sort_by=northcoders")
+        .expect(400);
+      expect(res.body.msg).toBe(`Not a valid sort_by query`);
+    });
+    test("Returns 400 status code if given invalid order", async () => {
+      const res = await request(app)
+        .get("/api/articles?order=northcoders")
+        .expect(400);
+      expect(res.body.msg).toBe(`Not a valid order query`);
+    });
   });
 
   describe("GET /api/articles/:article_id", () => {
@@ -92,7 +192,7 @@ describe("ARTICLES TESTS", () => {
 
     test("Returns 404 status code and a not found msg for article_id that's not in the database", async () => {
       const { body } = await request(app).get(`/api/articles/99`).expect(404);
-      expect(body.msg).toEqual("No article with id 99 found in the database");
+      expect(body.msg).toEqual("article_id 99 not found in the database");
     });
   });
 
@@ -135,7 +235,7 @@ describe("ARTICLES TESTS", () => {
         .patch(`/api/articles/99`)
         .send(articleUpdates)
         .expect(404);
-      expect(body.msg).toEqual("No article with id 99 found in the database");
+      expect(body.msg).toEqual("article_id 99 not found in the database");
     });
 
     test("Returns 400 status code if patch body value not valid", async () => {
@@ -206,7 +306,7 @@ describe("USERS TESTS", () => {
         .get(`/api/users/notInDatabase`)
         .expect(404);
       expect(body.msg).toEqual(
-        `Username notInDatabase not found in the database`
+        `username notInDatabase not found in the database`
       );
     });
   });
@@ -244,7 +344,7 @@ describe("COMMENTS TESTS", () => {
       const res = await request(app)
         .get("/api/articles/99/comments")
         .expect(404);
-      expect(res.body.msg).toBe(`No article with id 99 found in the database`);
+      expect(res.body.msg).toBe(`article_id 99 not found in the database`);
     });
 
     test("Returns 400 status code when article id is not valid", async () => {
@@ -296,7 +396,7 @@ describe("COMMENTS TESTS", () => {
         .post(`/api/articles/999/comments`)
         .send(newComment)
         .expect(404);
-      expect(body.msg).toEqual("No article with id 999 found in the database");
+      expect(body.msg).toEqual("article_id 999 not found in the database");
     });
 
     test("Returns 400 status code if post body key not valid", async () => {
@@ -334,7 +434,7 @@ describe("COMMENTS TESTS", () => {
         .send(newComment)
         .expect(404);
       expect(body.msg).toEqual(
-        `Username usernameNotInDatabase not found in the database`
+        `username usernameNotInDatabase not found in the database`
       );
     });
   });

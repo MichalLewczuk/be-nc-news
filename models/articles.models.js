@@ -1,17 +1,54 @@
 const db = require("../db/connection");
+const { checkExists } = require("../db/helpers/checkExists");
+const format = require("pg-format");
 
 //SELECT
 
-exports.selectArticles = async () => {
-  const result =
-    await db.query(`SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, 
-    COUNT(comment_id)::INT AS comment_count
-    FROM articles
-    LEFT JOIN comments
-    ON articles.article_id = comments.article_id
-    GROUP BY articles.article_id
-    ORDER BY created_at DESC;`);
-  return result.rows;
+exports.selectArticles = async (
+  sort_by = "created_at",
+  order = "DESC",
+  topic
+) => {
+  const validSort = [
+    "article_id",
+    "title",
+    "topic",
+    "author",
+    "created_at",
+    "votes",
+    "comment_count",
+  ];
+  if (!validSort.includes(sort_by)) {
+    return Promise.reject({
+      status: 400,
+      msg: "Not a valid sort_by query",
+    });
+  }
+  if (!["ASC", "DESC"].includes(order.toUpperCase())) {
+    return Promise.reject({
+      status: 400,
+      msg: "Not a valid order query",
+    });
+  }
+  let queryStr = format(
+    `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, 
+  COUNT(comment_id)::INT AS comment_count
+  FROM articles
+  LEFT JOIN comments
+  ON articles.article_id = comments.article_id`
+  );
+  const queryValues = [];
+  if (topic) {
+    queryStr += ` WHERE topic = $1`;
+    queryValues.push(topic);
+  }
+
+  queryStr += ` GROUP BY articles.article_id
+  ORDER BY ${sort_by} ${order.toUpperCase()};`;
+
+  const results = await db.query(queryStr, queryValues);
+
+  return results.rows;
 };
 
 exports.selectArticleById = async (article_id) => {
@@ -25,12 +62,7 @@ exports.selectArticleById = async (article_id) => {
      GROUP BY articles.article_id;`,
     [article_id]
   );
-  if (result.rows.length === 0) {
-    return Promise.reject({
-      status: 404,
-      msg: `No article with id ${article_id} found in the database`,
-    });
-  }
+  await checkExists("articles", "article_id", article_id);
 
   return result.rows[0];
 };
@@ -43,12 +75,7 @@ exports.updateArticleById = async (article_id, newVote) => {
     [article_id, newVote]
   );
 
-  if (result.rows.length === 0) {
-    return Promise.reject({
-      status: 404,
-      msg: `No article with id ${article_id} found in the database`,
-    });
-  }
+  await checkExists("articles", "article_id", article_id);
 
   return result.rows[0];
 };
