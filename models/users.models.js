@@ -1,4 +1,5 @@
 const db = require("../db/connection");
+const { checkExists } = require("../db/helpers/checkExists");
 
 // SELECT
 
@@ -9,17 +10,13 @@ exports.selectUsers = async () => {
 
 exports.selectUserByUsername = async (username) => {
   const result = await db.query(
-    `SELECT * 
+    `SELECT *
      FROM users
      WHERE username LIKE $1;`,
     [username]
   );
-  if (result.rows.length === 0) {
-    return Promise.reject({
-      status: 404,
-      msg: `Username ${username} not found in the database`,
-    });
-  }
+
+  await checkExists("users", "username", username);
 
   return result.rows[0];
 };

@@ -1,3 +1,4 @@
+const { checkExists } = require("../db/helpers/checkExists");
 const {
   selectCommentsByArticleId,
   insertComment,
@@ -13,7 +14,7 @@ exports.getCommentsByArticleId = async (req, res, next) => {
 
     const promises = [
       selectCommentsByArticleId(article_id),
-      selectArticleById(article_id),
+      checkExists("articles", "article_id", article_id),
     ];
 
     const results = await Promise.all(promises);
@@ -43,8 +44,8 @@ exports.postComment = async (req, res, next) => {
     }
 
     const promises = [
-      selectArticleById(article_id),
-      selectUserByUsername(username),
+      checkExists("articles", "article_id", article_id),
+      checkExists("users", "username", username),
       insertComment(article_id, username, body),
     ];
 

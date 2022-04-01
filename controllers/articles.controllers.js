@@ -1,3 +1,5 @@
+const { checkExists } = require("../db/helpers/checkExists");
+
 const {
   selectArticleById,
   updateArticleById,
@@ -8,7 +10,13 @@ const {
 
 exports.getArticles = async (req, res, next) => {
   try {
-    const articles = await selectArticles();
+    const { sort_by, order, topic } = req.query;
+    const promises = [];
+    if (topic) promises.push(await checkExists("topics", "slug", topic));
+    promises.push(selectArticles(sort_by, order, topic));
+
+    const results = await Promise.all(promises);
+    const articles = results[results.length - 1];
     res.status(200).send({ articles });
   } catch (err) {
     next(err);
