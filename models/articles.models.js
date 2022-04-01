@@ -1,5 +1,5 @@
 const db = require("../db/connection");
-const { checkExists } = require("../db/helpers/checkExists");
+const { checkExists } = require("../db/helpers/utils");
 const format = require("pg-format");
 
 //SELECT

@@ -1,4 +1,4 @@
-const { checkExists } = require("../db/helpers/checkExists");
+const { checkExists } = require("../db/helpers/utils");
 
 const {
   selectArticleById,
