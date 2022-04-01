@@ -90,6 +90,7 @@ describe("ARTICLES TESTS", () => {
         });
       });
     });
+
     test("Returns 200 status code and array of all articles sorted by given column in given order and filtered by given topic", async () => {
       const res = await request(app)
         .get("/api/articles?sort_by=comment_count&order=asc&topic=mitch")
@@ -109,6 +110,7 @@ describe("ARTICLES TESTS", () => {
         });
       });
     });
+
     test("Returns 200 status code and array of all articles in given order and filtered by given topic", async () => {
       const res = await request(app)
         .get("/api/articles?topic=mitch&order=DESC")
@@ -130,24 +132,28 @@ describe("ARTICLES TESTS", () => {
         });
       });
     });
+
     test("Returns 200 status code and en empty array if no articles with given topic", async () => {
       const res = await request(app)
         .get("/api/articles?topic=paper")
         .expect(200);
       expect(res.body.articles).toEqual([]);
     });
+
     test("Returns 404 status code if given topic not in the database", async () => {
       const res = await request(app)
         .get("/api/articles?topic=northcoders")
         .expect(404);
       expect(res.body.msg).toBe(`slug northcoders not found in the database`);
     });
+
     test("Returns 400 status code if given invalid sort_by", async () => {
       const res = await request(app)
         .get("/api/articles?sort_by=northcoders")
         .expect(400);
       expect(res.body.msg).toBe(`Not a valid sort_by query`);
     });
+
     test("Returns 400 status code if given invalid order", async () => {
       const res = await request(app)
         .get("/api/articles?order=northcoders")
@@ -436,6 +442,32 @@ describe("COMMENTS TESTS", () => {
       expect(body.msg).toEqual(
         `username usernameNotInDatabase not found in the database`
       );
+    });
+  });
+
+  describe("DELETE /api/comments/:comment_id", () => {
+    test("Returns 204 status code for a valid comment id that is in the database", async () => {
+      const res = await request(app).delete("/api/comments/2").expect(204);
+      const { body } = await request(app)
+        .get("/api/articles/1/comments")
+        .expect(200);
+      body.comments.forEach((comment) => {
+        expect(comment.comment_id).not.toBe(2);
+      });
+      const result = await request(app).get("/api/articles/1").expect(200);
+      expect(result.body.article.comment_count).toBe(10);
+    });
+
+    test("Returns 404 status code for a valid comment id that is not in the database", async () => {
+      const res = await request(app).delete("/api/comments/99").expect(404);
+      expect(res.body.msg).toBe("comment_id 99 not found in the database");
+    });
+
+    test("Returns 400 status code for an invalid comment id", async () => {
+      const res = await request(app)
+        .delete("/api/comments/notAValidId")
+        .expect(400);
+      expect(res.body.msg).toBe("Bad request");
     });
   });
 });

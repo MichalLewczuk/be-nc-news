@@ -2,9 +2,8 @@ const { checkExists } = require("../db/helpers/checkExists");
 const {
   selectCommentsByArticleId,
   insertComment,
+  removeCommentById,
 } = require("../models/comments.models");
-const { selectArticleById } = require("../models/articles.models");
-const { selectUserByUsername } = require("../models/users.models");
 
 // GET
 
@@ -53,6 +52,25 @@ exports.postComment = async (req, res, next) => {
     const comment = results[2];
 
     res.status(201).send({ comment });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// DELETE
+
+exports.deleteCommentById = async (req, res, next) => {
+  try {
+    const { comment_id } = req.params;
+
+    const promises = [
+      checkExists("comments", "comment_id", comment_id),
+      removeCommentById(comment_id),
+    ];
+
+    await Promise.all(promises);
+
+    res.status(204).send();
   } catch (err) {
     next(err);
   }
