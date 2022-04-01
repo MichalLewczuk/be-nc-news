@@ -6,6 +6,7 @@ const {
   handlePsqlErrors,
   handleServerErrors,
 } = require("./error-handlers/index.js");
+const { getApiEndpoints } = require("./controllers/api.controllers.js");
 
 // Topics Require
 
@@ -41,6 +42,10 @@ const app = express();
 app.use(express.json());
 
 // @ ENDPOINTS @
+
+//GET
+
+app.get("/api", getApiEndpoints);
 
 // ### TOPICS ###
 
