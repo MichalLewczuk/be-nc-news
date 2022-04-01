@@ -2,7 +2,14 @@ const {
   convertTimestampToDate,
   createRef,
   formatComments,
+  checkExists,
 } = require("../db/helpers/utils");
+
+const db = require("../db/connection");
+
+afterAll(() => {
+  db.end();
+});
 
 describe("convertTimestampToDate", () => {
   test("returns a new object", () => {
@@ -100,5 +107,17 @@ describe("formatComments", () => {
     const comments = [{ created_at: timestamp }];
     const formattedComments = formatComments(comments, {});
     expect(formattedComments[0].created_at).toEqual(new Date(timestamp));
+  });
+});
+
+describe("checkExists", () => {
+  test("If passed value found in the table column resolves", async () => {
+    await expect(checkExists("articles", "article_id", 1)).resolves.toBe();
+  });
+  test("If passed value not found in the table column rejects with error", async () => {
+    await expect(checkExists("articles", "article_id", 99)).rejects.toEqual({
+      status: 404,
+      msg: "article_id 99 not found in the database",
+    });
   });
 });

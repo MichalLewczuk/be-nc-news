@@ -1,4 +1,5 @@
 const db = require("../db/connection");
+const { checkExists } = require("../db/helpers/utils");
 
 // SELECT
 
@@ -24,4 +25,14 @@ exports.insertComment = async (article_id, username, body) => {
   );
 
   return result.rows[0];
+};
+
+// REMOVE
+
+exports.removeCommentById = async (comment_id) => {
+  const result = await db.query("DELETE FROM comments WHERE comment_id = $1;", [
+    comment_id,
+  ]);
+
+  return;
 };
